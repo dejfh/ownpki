@@ -131,7 +131,7 @@ int OwnPKI::exec(int argc, const char *args[])
         cout << "Available Commands" << endl <<
                 "newRnd, newKey, rootCA, signCA, sign" << endl << endl <<
                 "Available Arguments" << endl <<
-                "-rnd, -C, -O, -OU, -CN, -E, -days, -out, -key, -altdns, -ca, -caKey, -caCrtUrl, -caCrlUrl, -pass, -passin, -usage";
+                "-rnd, -C, -O, -OU, -CN, -E, -days, -out, -key, -altdns, -ca, -caKey, -caCrtUrl, -caCrlUrl, -pass, -passin, -usage" << endl;
         return 0;
     }
 
