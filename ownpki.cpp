@@ -82,9 +82,6 @@ int OwnPKI::exec(int argc, const char *args[])
             else E = *++args;
         else if (strcmp(*args, "-days") == 0)
             if (--argc <= 0) goto noargval;
-            else serialNumber = atol(*++args);
-        else if (strcmp(*args, "-days") == 0)
-            if (--argc <= 0) goto noargval;
             else validity = int(atof(*++args) * 24 * 60 * 60);
 
         else if (strcmp(*args, "-out") == 0)
@@ -119,6 +116,10 @@ int OwnPKI::exec(int argc, const char *args[])
         else if (strcmp(*args, "-usage") == 0)
             if (--argc <= 0) goto noargval;
             else usage = *++args;
+
+        else if (strcmp(*args, "-serial") == 0)
+            if (--argc <= 0) goto noargval;
+            else serialNumber = int(atol(*++args));
 
         else
             goto badarg;
