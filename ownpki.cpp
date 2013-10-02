@@ -132,7 +132,7 @@ int OwnPKI::exec(int argc, const char *args[])
         cout << "Available Commands" << endl <<
                 "newRnd, newKey, rootCA, signCA, sign" << endl << endl <<
                 "Available Arguments" << endl <<
-                "-rnd, -C, -O, -OU, -CN, -E, -days, -out, -key, -altdns, -ca, -caKey, -caCrtUrl, -caCrlUrl, -pass, -passin, -usage" << endl;
+                "-rnd, -C, -O, -OU, -CN, -E, -days, -out, -key, -altdns, -ca, -caKey, -caCrtUrl, -caCrlUrl, -pass, -passin, -usage, -serial" << endl;
         return 0;
     }
 
@@ -292,7 +292,7 @@ int OwnPKI::rootCA()
     BIO *bio;
 
     beginOp("Reading Private Key");
-    bio = BIO_new_file(keyFileName.c_str(), "r");
+    bio = BIO_new_file(caKeyFileName.c_str(), "r");
     EVP_PKEY *key = PEM_read_bio_PrivateKey(bio, NULL, &passwdCallback, this);
     BIO_free(bio);
     if (!key) { failOp(); return 100; }
@@ -306,7 +306,7 @@ int OwnPKI::rootCA()
     finishOp();
 
     beginOp("Writing certificate");
-    bio = BIO_new_file(fileName.c_str(), "w");
+    bio = BIO_new_file(caFileName.c_str(), "w");
     int r = PEM_write_bio_X509(bio, x);
     BIO_flush(bio);
     BIO_free(bio);
@@ -322,25 +322,24 @@ int OwnPKI::rootCA()
 
 int OwnPKI::signIntermediateCA()
 {
-    if (validity <= 0) validity = 10 * 365 * 24 * 60 * 60;
-
     usage = "ca";
     return sign();
 }
 
 int OwnPKI::sign()
 {
-    if (validity <= 0) validity = 548 * 24 * 60 * 60;
-
     X509Builder::CertUsage usage;
-    if (this->usage.compare("ca"))
+    if (this->usage.compare("ca") == 0)
         usage = X509Builder::CRT_USAGE_CA;
-    else if (this->usage.compare("server"))
+    else if (this->usage.compare("server") == 0)
         usage = X509Builder::CRT_USAGE_SERVER;
-    else if (this->usage.compare("ipsec"))
+    else if (this->usage.compare("ipsec") == 0)
         usage = X509Builder::CRT_USAGE_IPSECServer;
     else
         usage = X509Builder::CRT_USAGE_CLIENT;
+
+    if (validity <= 0)
+        validity = (usage == X509Builder::CRT_USAGE_CA ? 3650 : 548) *24*60*60;
 
     BIO *bio;
 
