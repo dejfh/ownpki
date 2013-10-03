@@ -43,6 +43,8 @@ public:
     int rootCA();
     int signIntermediateCA();
     int sign();
+
+    int crl();
 };
 
 #endif // OWNPKI_H

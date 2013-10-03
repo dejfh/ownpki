@@ -11,6 +11,7 @@
 #include <openssl/pem.h>
 
 #include "x509builder.h"
+#include "x509crlbuilder.h"
 #include "rsakeybuilder.h"
 
 int main(int argc, const char *args[])
@@ -130,7 +131,7 @@ int OwnPKI::exec(int argc, const char *args[])
 
     if (!cmd) {
         cout << "Available Commands" << endl <<
-                "newRnd, newKey, rootCA, signCA, sign" << endl << endl <<
+                "newRnd, newKey, rootCA, signCA, sign, crl" << endl << endl <<
                 "Available Arguments" << endl <<
                 "-rnd, -C, -O, -OU, -CN, -E, -days, -out, -key, -altdns, -ca, -caKey, -caCrtUrl, -caCrlUrl, -pass, -passin, -usage, -serial" << endl;
         return 0;
@@ -181,6 +182,8 @@ int OwnPKI::exec(int argc, const char *args[])
         r = signIntermediateCA();
     else if (strcmp(cmd, "sign") == 0)
         r = sign();
+    else if (strcmp(cmd, "crl") == 0)
+        r = crl();
     else
         goto badcmd;
 
@@ -374,6 +377,39 @@ int OwnPKI::sign()
     beginOp("Writing Certificate");
     bio = BIO_new_file(fileName.c_str(), "w");
     int r = PEM_write_bio_X509(bio, x);
+    BIO_flush(bio);
+    BIO_free(bio);
+    if (!r) { failOp(); return 100; }
+    finishOp();
+
+    return 0;
+}
+
+int OwnPKI::crl()
+{
+    BIO *bio;
+    beginOp("Reading CA Private Key");
+    bio = BIO_new_file(caKeyFileName.c_str(), "r");
+    RefPKey cakey(PEM_read_bio_PrivateKey(bio, NULL, &passwdCallback, this));
+    BIO_free(bio);
+    if (!cakey) { failOp(); return 100; }
+    finishOp();
+
+    beginOp("Reading CA Certificate");
+    bio = BIO_new_file(caFileName.c_str(), "r");
+    RefX509 ca(PEM_read_bio_X509(bio, NULL, NULL, NULL));
+    BIO_free(bio);
+    if (!ca) { failOp(); return 100; }
+    finishOp();
+
+    beginOp("Building Certificate Revocation List");
+    X509CrlBuilder builder(ca, cakey);
+    RefX509Crl crl(builder.build());
+    finishOp();
+
+    beginOp("Writing Certificate Revocation List");
+    bio = BIO_new_file(fileName.c_str(), "w");
+    int r = PEM_write_bio_X509_CRL(bio, crl);
     BIO_flush(bio);
     BIO_free(bio);
     if (!r) { failOp(); return 100; }

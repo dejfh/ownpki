@@ -18,7 +18,8 @@ SOURCES += \
     passwd.cpp \
     x509builder.cpp \
     rsakeybuilder.cpp \
-    ownpki.cpp
+    ownpki.cpp \
+    x509crlbuilder.cpp
 
     
 HEADERS += \
@@ -26,7 +27,8 @@ HEADERS += \
     extensions.h \
     x509builder.h \
     rsakeybuilder.h \
-    ownpki.h
+    ownpki.h \
+    x509crlbuilder.h
 
 win32 {
 LIBS += -LC:/OpenSSL-Win64/lib/VC/static
