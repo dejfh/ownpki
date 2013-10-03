@@ -149,6 +149,7 @@ X509 *X509Builder::build(X509 *ca, EVP_PKEY *caKey, long serialNumber, CertUsage
         }
         if (flagsSet(usage, CRT_USAGE_SERVER)) {
             ASN1_BIT_STRING_set_bit(bs, KU_BIT_digitalSignature, 1);
+            ASN1_BIT_STRING_set_bit(bs, KU_BIT_contentCommitment, 1);
             ASN1_BIT_STRING_set_bit(bs, KU_BIT_keyEncipherment, 1);
             ASN1_BIT_STRING_set_bit(bs, KU_BIT_dataEncipherment, 1);
             ASN1_BIT_STRING_set_bit(bs, KU_BIT_keyAgreement, 1);
