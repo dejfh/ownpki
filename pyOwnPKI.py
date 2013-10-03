@@ -19,7 +19,7 @@ class ownPKI:
 				
 	def getKeyArgs(self, name):
 		args = ['ownPKI', 'newKey']
-		args += ['-rnd', 'rnd', '-out', name + '.pub', '-key', name + '.key']
+		args += ['-rnd', 'rnd', '-out', name + '.pub', '-key', 'private/' + name + '.key']
 		if not hasattr(self, 'password'):
 			args += ['-passin']
 		else:
@@ -28,7 +28,7 @@ class ownPKI:
 	
 	def getSignArgs(self, cmd, C, CN, name = None, usage = None, dns = None):
 		args = ['ownPKI', cmd]
-		args += ['-rnd', 'rnd', '-ca', self.name + '.crt', '-caKey', self.name + '.key']
+		args += ['-rnd', 'rnd', '-ca', self.name + '.crt', '-caKey', 'private/' + self.name + '.key']
 		if not hasattr(self, 'password'):
 			args += ['-passin']
 		else:
@@ -61,14 +61,19 @@ class ownPKI:
 		f.flush()
 		f.close()
 
-		if not os.path.isdir('certs'):
-			os.makedirs('certs')
 		shutil.copy(name + '.crt', 'certs/' + str(serial) + '.crt')
 		
 	def createKey(self, name):
+		if not os.path.isdir('private'):
+			os.makedirs('private')
 		subprocess.call(self.getKeyArgs(name))
 		
 	def newRoot(self, C, CN):
+		if not os.path.isdir('private'):
+			os.makedirs('private')
+		if not os.path.isdir('certs'):
+			os.makedirs('certs')
+
 		if not os.path.exists(self.name + '.key'):
 			print 'creating new key ...'
 			subprocess.call(self.getKeyArgs(self.name))
