@@ -2,6 +2,8 @@
 
 #include "extensions.h"
 
+#include <string.h>
+
 X509Builder::X509Builder()
     : valid_seconds(20*365*24*60*60)
     , crlDistPoints(NULL)
@@ -89,8 +91,6 @@ X509 *X509Builder::build(X509 *ca, EVP_PKEY *caKey, long serialNumber, CertUsage
             X509_NAME_add_entry(name, O, -1, 0);
         if (OU.ptr)
             X509_NAME_add_entry(name, OU, -1, 0);
-//        if (DN.ptr)
-//            X509_NAME_add_entry(name, DN, -1, 0);
         if (CN.ptr)
             X509_NAME_add_entry(name, CN, -1, 0);
         if (E.ptr)
@@ -206,9 +206,6 @@ void X509Builder::setOrganisation(const char *o)
 void X509Builder::setOrganisationUnit(const char *ou)
 { OU = X509_NAME_ENTRY_create_by_NID(NULL, NID_organizationalUnitName, MBSTRING_UTF8, (unsigned char*)ou, -1); }
 
-//void X509Builder::setDistinguishedName(const char *dn)
-//{ DN = X509_NAME_ENTRY_create_by_NID(NULL, NID_distinguishedName, MBSTRING_UTF8, (unsigned char*)dn, -1); }
-
 void X509Builder::setCommonName(const char *cn)
 { CN = X509_NAME_ENTRY_create_by_NID(NULL, NID_commonName, MBSTRING_UTF8, (unsigned char*)cn, -1); }
 
@@ -220,7 +217,10 @@ void X509Builder::addAltName(const char *name, NameType type)
     if (!subjectAltNames)
         subjectAltNames = GENERAL_NAMES_new();
 
-    GENERAL_NAME *gn = a2i_GENERAL_NAME(NULL, NULL, NULL, type, (char *)name, 0);
+    GENERAL_NAME *gn = GENERAL_NAME_new();
+    gn->d.ia5 = ASN1_IA5STRING_new();
+    ASN1_STRING_set(gn->d.ia5, (unsigned char*)name, strlen(name));
+    gn->type = type;
     sk_GENERAL_NAME_push(subjectAltNames, gn);
 }
 
@@ -234,7 +234,10 @@ void X509Builder::addCrlDistPoint(const char *url)
     crlDistPoint->distpoint->type = 0;
 
     crlDistPoint->distpoint->name.fullname = GENERAL_NAMES_new();
-    GENERAL_NAME *name = a2i_GENERAL_NAME(NULL, NULL, NULL, GEN_URI, (char *)url, 0);
+    GENERAL_NAME *name = GENERAL_NAME_new();
+    name->d.ia5 = ASN1_IA5STRING_new();
+    ASN1_STRING_set(name->d.ia5, (unsigned char*)url, strlen(url));
+    name->type = GEN_URI;
     sk_GENERAL_NAME_push(crlDistPoint->distpoint->name.fullname, name);
 
     sk_DIST_POINT_push(crlDistPoints, crlDistPoint);
@@ -246,7 +249,11 @@ void X509Builder::addAuthorityInfoAccessCrt(const char *url)
 
     ACCESS_DESCRIPTION *ad = ACCESS_DESCRIPTION_new();
     ad->method = OBJ_nid2obj(NID_ad_ca_issuers);
-    ad->location = a2i_GENERAL_NAME(NULL, NULL, NULL, GEN_URI, (char *)url, 0);
+    ad->location = GENERAL_NAME_new();
+    GENERAL_NAME *name = ad->location;
+    name->d.ia5 = ASN1_IA5STRING_new();
+    ASN1_STRING_set(name->d.ia5, (unsigned char*)url, strlen(url));
+    name->type = GEN_URI;
 
     sk_ACCESS_DESCRIPTION_push(authInfoAccess.ptr, ad);
 }
@@ -257,7 +264,11 @@ void X509Builder::addAuthorityInfoAccessOCSP(const char *url)
 
     ACCESS_DESCRIPTION *ad = ACCESS_DESCRIPTION_new();
     ad->method = OBJ_nid2obj(NID_ad_OCSP);
-    ad->location = a2i_GENERAL_NAME(NULL, NULL, NULL, GEN_URI, (char *)url, 0);
+    ad->location = GENERAL_NAME_new();
+    GENERAL_NAME *name = ad->location;
+    name->d.ia5 = ASN1_IA5STRING_new();
+    ASN1_STRING_set(name->d.ia5, (unsigned char*)url, strlen(url));
+    name->type = GEN_URI;
 
     sk_ACCESS_DESCRIPTION_push(authInfoAccess.ptr, ad);
 }

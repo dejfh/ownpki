@@ -23,8 +23,8 @@ int main(int argc, const char *args[])
 using namespace std;
 
 OwnPKI::OwnPKI()
-    : validity(0)
-    , serialNumber(0)
+    : serialNumber(0)
+    , validity(0)
     , xb(NULL)
 { }
 
@@ -72,9 +72,6 @@ int OwnPKI::exec(int argc, const char *args[])
         else if (strcmp(*args, "-OU") == 0)
             if (--argc <= 0) goto noargval;
             else OU = *++args;
-//        else if (strcmp(*args, "-DN") == 0)
-//            if (--argc <= 0) goto noargval;
-//            else DN = *++args;
         else if (strcmp(*args, "-CN") == 0)
             if (--argc <= 0) goto noargval;
             else CN = *++args;
@@ -234,7 +231,6 @@ void OwnPKI::makeBuilder()
     if (C.length()) xb->setCountry(C.c_str());
     if (O.length()) xb->setOrganisation(O.c_str());
     if (OU.length()) xb->setOrganisationUnit(OU.c_str());
-//    if (DN.length()) xb->setDistinguishedName(DN.c_str());
     if (CN.length()) xb->setCommonName(CN.c_str());
     if (E.length()) xb->setEmailAddress(E.c_str());
     if (caCrlUrl.length()) xb->addCrlDistPoint(caCrlUrl.c_str());

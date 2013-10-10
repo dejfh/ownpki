@@ -46,7 +46,6 @@ private:
     RefNameEntry C;
     RefNameEntry O;
     RefNameEntry OU;
-//    RefNameEntry DN;
     RefNameEntry CN;
     RefNameEntry E;
 
@@ -66,7 +65,6 @@ public:
     void setCountry(const char *c);
     void setOrganisation(const char *o);
     void setOrganisationUnit(const char *ou);
-//    void setDistinguishedName(const char *dn);
     void setCommonName(const char *cn);
     void setEmailAddress(const char *e);
 
