@@ -88,9 +88,9 @@ int OwnPKI::exec(int argc, const char *args[])
         else if (strcmp(*args, "-key") == 0)
             if (--argc <= 0) goto noargval;
             else keyFileName = *++args;
-        else if (strcmp(*args, "-altdns") == 0)
+        else if (strcmp(*args, "-dns") == 0)
             if (--argc <= 0) goto noargval;
-            else altDns.push_back(*++args);
+            else dns.push_back(*++args);
 
         else if (strcmp(*args, "-ca") == 0)
             if (--argc <= 0) goto noargval;
@@ -130,7 +130,7 @@ int OwnPKI::exec(int argc, const char *args[])
         cout << "Available Commands" << endl <<
                 "newRnd, newKey, rootCA, signCA, sign, crl" << endl << endl <<
                 "Available Arguments" << endl <<
-                "-rnd, -C, -O, -OU, -CN, -E, -days, -out, -key, -altdns, -ca, -caKey, -caCrtUrl, -caCrlUrl, -pass, -passin, -usage, -serial" << endl;
+                "-rnd, -C, -O, -OU, -CN, -E, -days, -out, -key, -dns, -ca, -caKey, -caCrtUrl, -caCrlUrl, -pass, -passin, -usage, -serial" << endl;
         return 0;
     }
 
@@ -234,7 +234,7 @@ void OwnPKI::makeBuilder()
     if (CN.length()) xb->setCommonName(CN.c_str());
     if (E.length()) xb->setEmailAddress(E.c_str());
     if (caCrlUrl.length()) xb->addCrlDistPoint(caCrlUrl.c_str());
-    for (std::vector<std::string>::const_iterator it=altDns.begin(); it != altDns.end(); ++it)
+    for (std::vector<std::string>::const_iterator it=dns.begin(); it != dns.end(); ++it)
         xb->addAltName((*it).c_str(), X509Builder::NAME_TYPE_DNS);
     if (caCrtUrl.length()) xb->addAuthorityInfoAccessCrt(caCrtUrl.c_str());
     xb->setValidity(validity);

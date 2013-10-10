@@ -218,8 +218,11 @@ void X509Builder::addAltName(const char *name, NameType type)
         subjectAltNames = GENERAL_NAMES_new();
 
     GENERAL_NAME *gn = GENERAL_NAME_new();
-    gn->d.ia5 = ASN1_IA5STRING_new();
-    ASN1_STRING_set(gn->d.ia5, (unsigned char*)name, strlen(name));
+    if (type == NAME_TYPE_DNS) {
+        gn->d.ia5 = ASN1_IA5STRING_new();
+        ASN1_STRING_set(gn->d.ia5, (unsigned char*)name, strlen(name));
+    } else
+        return;
     gn->type = type;
     sk_GENERAL_NAME_push(subjectAltNames, gn);
 }

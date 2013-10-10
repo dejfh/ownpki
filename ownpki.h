@@ -16,7 +16,7 @@ class OwnPKI
 
     std::string fileName;
     std::string keyFileName;
-    std::vector<std::string> altDns;
+    std::vector<std::string> dns;
 
     std::string caFileName;
     std::string caKeyFileName;
