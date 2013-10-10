@@ -40,7 +40,7 @@ class ownPKI:
 		if not usage is None:
 			args += ['-usage', usage]
 		if not dns is None:
-			args += ['-altdns', dns]
+			args += ['-dns', dns]
 		args += ['-serial', str(self.serial)]
 		return args
 		
