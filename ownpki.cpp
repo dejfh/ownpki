@@ -23,8 +23,8 @@ int main(int argc, const char *args[])
 using namespace std;
 
 OwnPKI::OwnPKI()
-    : validity(0)
-    , serialNumber(0)
+    : serialNumber(0)
+    , validity(0)
     , xb(NULL)
 { }
 

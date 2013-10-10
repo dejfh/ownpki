@@ -4,12 +4,15 @@
 
 EVP_PKEY *RsaKeyBuilder::createRsaKey(int bits)
 {
-    EVP_PKEY_CTX *ctx;
-    EVP_PKEY *key = NULL;
-    ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
-    EVP_PKEY_keygen_init(ctx);
-    EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, bits);
-    EVP_PKEY_keygen(ctx, &key);
-    EVP_PKEY_CTX_free(ctx);
+    RSA *rsa = RSA_new();
+    BIGNUM *bn = BN_new();
+    BN_set_word(bn, RSA_F4);
+    if (!RSA_generate_key_ex(rsa, 4096, bn, NULL))
+    { RSA_free(rsa); rsa = NULL; }
+    BN_free(bn);
+    if (!rsa)
+        return NULL;
+    EVP_PKEY *key = EVP_PKEY_new();
+    EVP_PKEY_assign_RSA(key, rsa);
     return key;
 }
