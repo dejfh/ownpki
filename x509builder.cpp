@@ -154,17 +154,22 @@ X509 *X509Builder::build(X509 *ca, EVP_PKEY *caKey, long serialNumber, CertUsage
             ASN1_BIT_STRING_set_bit(bs, KU_BIT_dataEncipherment, 1);
             ASN1_BIT_STRING_set_bit(bs, KU_BIT_keyAgreement, 1);
         }
+        if (flagsSet(usage, CRT_USAGE_CLIENT))
+            ASN1_BIT_STRING_set_bit(bs, KU_BIT_digitalSignature, 1);
 
         RefExtension ext(X509V3_EXT_i2d(NID_key_usage, 0, bs));
         X509_add_ext(x, ext, -1);
     }
 
     // Set Extended Usage
-    if (flagsSet(usage, CRT_USAGE_SERVER))
+    if (flagsSet(usage, CRT_USAGE_SERVER) || flagsSet(usage, CRT_USAGE_CLIENT))
     {
         EXTENDED_KEY_USAGE *eku = EXTENDED_KEY_USAGE_new();
 
-        sk_ASN1_OBJECT_push(eku, OBJ_txt2obj("1.3.6.1.5.5.7.3.1", 0)); // ServerAuthentication
+        if (flagsSet(usage, CRT_USAGE_CLIENT))
+            sk_ASN1_OBJECT_push(eku, OBJ_txt2obj("1.3.6.1.5.5.7.3.2", 0)); // ClientAuthentication
+        if (flagsSet(usage, CRT_USAGE_SERVER))
+            sk_ASN1_OBJECT_push(eku, OBJ_txt2obj("1.3.6.1.5.5.7.3.1", 0)); // ServerAuthentication
         if (flagsSet(usage, CRT_USAGE_IPSECServer))
             sk_ASN1_OBJECT_push(eku, OBJ_txt2obj("1.3.6.1.5.5.8.2.2", 0)); // IPsecurityIKEintermediate
 

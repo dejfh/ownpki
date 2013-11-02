@@ -37,13 +37,13 @@ OwnPKI::~OwnPKI()
 void SetStdinEcho(bool enable = true);
 
 inline void beginOp(const char *op)
-{ cout << op << " -"; }
+{ cerr << op << " -"; }
 inline void continueOp(const char *op)
-{ cout << " " << op << " -"; }
+{ cerr << " " << op << " -"; }
 inline void finishOp()
-{ cout << " done." << endl; }
+{ cerr << " done." << endl; }
 inline void failOp()
-{ cout << " failed." << endl; }
+{ cerr << " failed." << endl; }
 
 int OwnPKI::exec(int argc, const char *args[])
 {
@@ -127,7 +127,7 @@ int OwnPKI::exec(int argc, const char *args[])
     }
 
     if (!cmd) {
-        cout << "Available Commands" << endl <<
+        cerr << "Available Commands" << endl <<
                 "newRnd, newKey, rootCA, signCA, sign, crl" << endl << endl <<
                 "Available Arguments" << endl <<
                 "-rnd, -C, -O, -OU, -CN, -E, -days, -out, -key, -dns, -ca, -caKey, -caCrtUrl, -caCrlUrl, -pass, -passin, -usage, -serial" << endl;
@@ -138,14 +138,14 @@ int OwnPKI::exec(int argc, const char *args[])
     {
         char buffer[1024];
         SetStdinEcho(false);
-        cout << "keyfile password: ";
+        cerr << "keyfile password: ";
         cin.getline(buffer, sizeof(buffer));
         SetStdinEcho(true);
         passwd = buffer;
         if (passwd.length())
-            cout << "* * *" << endl;
+            cerr << "* * *" << endl;
         else
-            cout << "no password" << endl;
+            cerr << "no password" << endl;
     }
 
     beginOp("Loading OpenSSL Algorithms");
@@ -197,15 +197,15 @@ int OwnPKI::exec(int argc, const char *args[])
     return r;
 
 badcmd:
-    cout << "Unknown Command: " << cmd << endl;
+    cerr << "Unknown Command: " << cmd << endl;
     return 1;
 
 badarg:
-    cout << "Unknown Argument: " << *args << endl;
+    cerr << "Unknown Argument: " << *args << endl;
     return 2;
 
 noargval:
-    cout << "Argument needs Value: " << *args << endl;
+    cerr << "Argument needs Value: " << *args << endl;
     return 3;
 
 badrand:
@@ -343,7 +343,10 @@ int OwnPKI::sign()
     BIO *bio;
 
     beginOp("Reading Public Key");
-    bio = BIO_new_file(keyFileName.c_str(), "r");
+    if (keyFileName.length()>0)
+        bio = BIO_new_file(keyFileName.c_str(), "r");
+    else
+        bio = BIO_new_fp(stdin, BIO_NOCLOSE);
     RefPKey key(PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL));
     BIO_free(bio);
     if (!key) { failOp(); return 100; }
@@ -371,7 +374,10 @@ int OwnPKI::sign()
     finishOp();
 
     beginOp("Writing Certificate");
-    bio = BIO_new_file(fileName.c_str(), "w");
+    if (fileName.length()>0)
+        bio = BIO_new_file(fileName.c_str(), "w");
+    else
+        bio = BIO_new_fp(stdout, BIO_NOCLOSE);
     int r = PEM_write_bio_X509(bio, x);
     BIO_flush(bio);
     BIO_free(bio);
